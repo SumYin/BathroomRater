@@ -7,6 +7,74 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .sponsors-section {
+            padding: 4rem 0;
+            background: #f8f9fa;
+            overflow: hidden;
+        }
+        
+        .sponsors-container {
+            display: flex;
+            animation: scroll 20s linear infinite;
+        }
+        
+        .sponsor-logo {
+            flex: 0 0 auto;
+            margin: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sponsor-logo img {
+            max-width: 120px;
+            height: auto;
+            filter: grayscale(100%);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+        
+        .sponsor-logo:hover img {
+            filter: grayscale(0%);
+            opacity: 1;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        .footer {
+            background: #2d3436;
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #6B73FF;
+        }
+        
+        .github-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -88,7 +156,7 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="stats-section py-5 bg-light">
+    <section class="stats-section py-5">
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-4">
@@ -126,6 +194,107 @@
         </div>
     </section>
 
+    <!-- Sponsors Section -->
+    <section class="sponsors-section">
+        <div class="container">
+            <h2 class="text-center mb-5">Our Sponsors</h2>
+            <div class="sponsors-container">
+                <!-- First set of logos -->
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png" alt="Google">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/1200px-IBM_logo.svg.png" alt="IBM">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1200px-Microsoft_logo.svg.png" alt="Microsoft">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1200px-Octicons-mark-github.svg.png" alt="GitHub">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1200px-Facebook_Logo_%282019%29.png" alt="Facebook">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1200px-WhatsApp.svg.png" alt="WhatsApp">
+                </div>
+                <!-- Duplicate set for seamless scrolling -->
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png" alt="Google">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/IBM_logo.svg/1200px-IBM_logo.svg.png" alt="IBM">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/1200px-Microsoft_logo.svg.png" alt="Microsoft">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1200px-Octicons-mark-github.svg.png" alt="GitHub">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1200px-Facebook_Logo_%282019%29.png" alt="Facebook">
+                </div>
+                <div class="sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/1200px-WhatsApp.svg.png" alt="WhatsApp">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Bathroom Rating App</h3>
+                    <p class="mb-0">Making the world a better place, one bathroom at a time.</p>
+                </div>
+                <div class="footer-links">
+                    <a href="https://github.com/SumYin/BathroomRater" target="_blank" class="github-link">
+                        <i class="bi bi-github"></i>
+                        View on GitHub
+                    </a>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Animate numbers on scroll
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const numbers = entry.target.querySelectorAll('.stat-number');
+                    numbers.forEach(number => {
+                        const target = parseInt(number.textContent);
+                        let current = 0;
+                        const increment = target / 50;
+                        const updateNumber = () => {
+                            if (current < target) {
+                                current += increment;
+                                number.textContent = Math.round(current);
+                                requestAnimationFrame(updateNumber);
+                            } else {
+                                number.textContent = target;
+                            }
+                        };
+                        updateNumber();
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.stat-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html> 
