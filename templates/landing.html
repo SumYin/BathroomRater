@@ -1,110 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bathroom Rating App - Find the Best Bathrooms</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .sponsors-section {
-            padding: 4rem 0;
-            background: #f8f9fa;
-            overflow: hidden;
-        }
-        
-        .sponsors-container {
-            display: flex;
-            animation: scroll 20s linear infinite;
-        }
-        
-        .sponsor-logo {
-            flex: 0 0 auto;
-            margin: 0 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .sponsor-logo img {
-            max-width: 120px;
-            height: auto;
-            filter: grayscale(100%);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-        }
-        
-        .sponsor-logo:hover img {
-            filter: grayscale(0%);
-            opacity: 1;
-        }
-        
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        
-        .footer {
-            background: #2d3436;
-            color: white;
-            padding: 3rem 0;
-            margin-top: 4rem;
-        }
-        
-        .footer-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            margin-left: 1.5rem;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-links a:hover {
-            color: #6B73FF;
-        }
-        
-        .github-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">Bathroom Rating App</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if 'user_id' in session %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
+{% block title %}Bathroom Rating App - Find the Best Bathrooms{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sponsors-section {
+        padding: 4rem 0;
+        background: #f8f9fa;
+        overflow: hidden;
+    }
+    
+    .sponsors-container {
+        display: flex;
+        animation: scroll 20s linear infinite;
+    }
+    
+    .sponsor-logo {
+        flex: 0 0 auto;
+        margin: 0 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .sponsor-logo img {
+        max-width: 120px;
+        height: auto;
+        filter: grayscale(100%);
+        opacity: 0.7;
+        transition: all 0.3s ease;
+    }
+    
+    .sponsor-logo:hover img {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+    
+    @keyframes scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    
+    .footer {
+        background: #2d3436;
+        color: white;
+        padding: 3rem 0;
+        margin-top: 4rem;
+    }
+    
+    .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .footer-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 1.5rem;
+        transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+        color: #6B73FF;
+    }
+    
+    .github-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
@@ -261,40 +230,40 @@
             </div>
         </div>
     </footer>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Animate numbers on scroll
-        const observerOptions = {
-            threshold: 0.5
-        };
+{% block extra_js %}
+<script>
+    // Animate numbers on scroll
+    const observerOptions = {
+        threshold: 0.5
+    };
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const numbers = entry.target.querySelectorAll('.stat-number');
-                    numbers.forEach(number => {
-                        const target = parseInt(number.textContent);
-                        let current = 0;
-                        const increment = target / 50;
-                        const updateNumber = () => {
-                            if (current < target) {
-                                current += increment;
-                                number.textContent = Math.round(current);
-                                requestAnimationFrame(updateNumber);
-                            } else {
-                                number.textContent = target;
-                            }
-                        };
-                        updateNumber();
-                    });
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.stat-card').forEach(card => {
-            observer.observe(card);
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const numbers = entry.target.querySelectorAll('.stat-number');
+                numbers.forEach(number => {
+                    const target = parseInt(number.textContent);
+                    let current = 0;
+                    const increment = target / 50;
+                    const updateNumber = () => {
+                        if (current < target) {
+                            current += increment;
+                            number.textContent = Math.round(current);
+                            requestAnimationFrame(updateNumber);
+                        } else {
+                            number.textContent = target;
+                        }
+                    };
+                    updateNumber();
+                });
+            }
         });
-    </script>
-</body>
-</html> 
+    }, observerOptions);
+
+    document.querySelectorAll('.stat-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %} 

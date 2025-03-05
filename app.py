@@ -7,21 +7,16 @@ from functools import wraps
 import json
 import os
 from sqlalchemy import func
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from config import config
 
 app = Flask(__name__)
-
-# Database configuration
-if os.environ.get('DATABASE_URL'):
-    # Production database (PostgreSQL)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
-else:
-    # Local development database (SQLite)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bathroom_ratings.db'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
+app.config.from_object(config[os.environ.get('FLASK_ENV', 'default')])
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -92,6 +87,13 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+@app.context_processor
+def inject_unread_messages():
+    if 'user_id' in session:
+        unread_count = Message.query.filter_by(recipient_id=session['user_id'], read=False).count()
+        return {'unread_messages': unread_count}
+    return {'unread_messages': 0}
 
 with app.app_context():
     db.create_all()
