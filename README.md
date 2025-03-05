@@ -22,8 +22,8 @@ A Flask web application that allows users to rate and review bathrooms, share th
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/bathroom-rating-app.git
-cd bathroom-rating-app
+git clone https://github.com/SumYin/BathroomRater.git
+cd BathroomRater
 ```
 
 2. Create and activate a virtual environment:
