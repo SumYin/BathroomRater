@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background -->
+    <rect width="800" height="600" fill="#F8F9FA"/>
+    
+    <!-- Bathroom Icon -->
+    <g transform="translate(200, 100)">
+        <!-- Building -->
+        <rect x="0" y="0" width="400" height="400" fill="#E9ECEF" rx="20"/>
+        
+        <!-- Door -->
+        <rect x="175" y="100" width="50" height="100" fill="#6C757D"/>
+        
+        <!-- Window -->
+        <rect x="75" y="150" width="50" height="50" fill="#6C757D"/>
+        <rect x="275" y="150" width="50" height="50" fill="#6C757D"/>
+        
+        <!-- Rating Stars -->
+        <g transform="translate(150, 250)">
+            <circle cx="0" cy="0" r="10" fill="#FFD700"/>
+            <circle cx="30" cy="0" r="10" fill="#FFD700"/>
+            <circle cx="60" cy="0" r="10" fill="#FFD700"/>
+            <circle cx="90" cy="0" r="10" fill="#FFD700"/>
+            <circle cx="120" cy="0" r="10" fill="#FFD700"/>
+        </g>
+        
+        <!-- Location Pin -->
+        <g transform="translate(200, 350)">
+            <path d="M0 -50 L20 0 L0 20 L-20 0 Z" fill="#0D6EFD"/>
+            <circle cx="0" cy="0" r="10" fill="#0D6EFD"/>
+        </g>
+    </g>
+    
+    <!-- Decorative Elements -->
+    <circle cx="100" cy="100" r="30" fill="#0D6EFD" opacity="0.1"/>
+    <circle cx="700" cy="500" r="40" fill="#0D6EFD" opacity="0.1"/>
+    <circle cx="400" cy="300" r="25" fill="#0D6EFD" opacity="0.1"/>
+</svg> 

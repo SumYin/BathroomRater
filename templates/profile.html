@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Bathroom Rating App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h3>{{ user.username }}</h3>
+                        <p class="text-muted">{{ user.email }}</p>
+                        <div class="stats">
+                            <p>Ratings: {{ user.ratings|length }}</p>
+                            <p>Favorites: {{ user.favorites|length }}</p>
+                        </div>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">Back to Home</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <h3 class="mb-4">My Ratings</h3>
+                <div class="row">
+                    {% for rating in user.ratings|sort(attribute='timestamp', reverse=true) %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card rating-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title">{{ rating.location }}</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-danger delete-rating" data-id="{{ rating.id }}">Delete</button>
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">{{ rating.timestamp.strftime('%Y-%m-%d %H:%M') }} • {{ rating.gender }}</small>
+                                </p>
+                                <div class="rating-details">
+                                    <p>Cleanliness: {{ rating.cleanliness }}/5</p>
+                                    <p>Privacy: {{ rating.privacy }}/5</p>
+                                    <p>Accessibility: {{ rating.accessibility }}/5</p>
+                                    <p>Amenities: {{ rating.amenities }}/5</p>
+                                    <p>Overall: {{ rating.overall_rating }}/5</p>
+                                </div>
+                                {% if rating.comments %}
+                                <div class="comments-section">
+                                    <p class="card-text comment-text">{{ rating.comments }}</p>
+                                    {% if rating.comments|length > 100 %}
+                                    <button class="btn btn-link btn-sm read-more">Read More</button>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <h3 class="mb-4 mt-5">My Favorites</h3>
+                <div class="row">
+                    {% for favorite in user.favorites|sort(attribute='timestamp', reverse=true) %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card rating-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title">{{ favorite.rating.location }}</h5>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary favorite-btn" data-id="{{ favorite.rating.id }}">
+                                            <i class="bi bi-heart-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <small class="text-muted">{{ favorite.rating.timestamp.strftime('%Y-%m-%d %H:%M') }} • {{ favorite.rating.gender }}</small>
+                                </p>
+                                <div class="rating-details">
+                                    <p>Cleanliness: {{ favorite.rating.cleanliness }}/5</p>
+                                    <p>Privacy: {{ favorite.rating.privacy }}/5</p>
+                                    <p>Accessibility: {{ favorite.rating.accessibility }}/5</p>
+                                    <p>Amenities: {{ favorite.rating.amenities }}/5</p>
+                                    <p>Overall: {{ favorite.rating.overall_rating }}/5</p>
+                                </div>
+                                {% if favorite.rating.comments %}
+                                <div class="comments-section">
+                                    <p class="card-text comment-text">{{ favorite.rating.comments }}</p>
+                                    {% if favorite.rating.comments|length > 100 %}
+                                    <button class="btn btn-link btn-sm read-more">Read More</button>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Read More functionality
+        document.querySelectorAll('.read-more').forEach(button => {
+            button.addEventListener('click', function() {
+                const commentText = this.previousElementSibling;
+                if (commentText.classList.contains('expanded')) {
+                    commentText.classList.remove('expanded');
+                    this.textContent = 'Read More';
+                } else {
+                    commentText.classList.add('expanded');
+                    this.textContent = 'Show Less';
+                }
+            });
+        });
+
+        // Delete functionality
+        document.querySelectorAll('.delete-rating').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete this rating?')) {
+                    const ratingId = this.dataset.id;
+                    fetch(`/delete/${ratingId}`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.closest('.col-md-6').remove();
+                        }
+                    });
+                }
+            });
+        });
+
+        // Favorite functionality
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const ratingId = this.dataset.id;
+                fetch(`/favorite/${ratingId}`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('.col-md-6').remove();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
