@@ -51,7 +51,7 @@
                 <h5 class="card-title">Send Message to {{ recipient.username }}</h5>
                 <form action="{{ url_for('send_message', recipient_id=recipient.id) }}" method="POST">
                     <div class="mb-3">
-                        <textarea class="form-control" name="content" rows="3" required></textarea>
+                        <textarea class="form-control" name="content" rows="3" required placeholder="Type your message here..."></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Send Message</button>
                 </form>
@@ -63,16 +63,21 @@
             <div class="col-md-6">
                 <h2 class="h4 mb-3">Received Messages</h2>
                 {% for message in received_messages %}
-                <div class="card mb-3 {% if not message.read %}border-primary{% endif %}">
+                <div class="card mb-3 {% if not message.read %}border-primary{% endif %}" data-message-id="{{ message.id }}">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start">
                             <h6 class="card-subtitle mb-2 text-muted">From: {{ message.sender.username }}</h6>
                             <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
                         </div>
                         <p class="card-text">{{ message.content }}</p>
-                        <a href="{{ url_for('messages') }}?user={{ message.sender.username }}&user_id={{ message.sender.id }}" class="btn btn-sm btn-primary">
-                            Reply
-                        </a>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('messages') }}?user_id={{ message.sender.id }}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-reply"></i> Reply
+                            </a>
+                            {% if not message.read %}
+                            <span class="badge bg-primary">New</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% else %}
@@ -90,6 +95,16 @@
                             <small class="text-muted">{{ message.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
                         </div>
                         <p class="card-text">{{ message.content }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('messages') }}?user_id={{ message.recipient.id }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-reply"></i> Reply
+                            </a>
+                            {% if message.read %}
+                            <span class="badge bg-success">Read</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Unread</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% else %}
@@ -100,5 +115,47 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-scroll to message form if recipient is selected
+        {% if recipient %}
+        document.querySelector('textarea[name="content"]').focus();
+        {% endif %}
+
+        // Handle message status updates
+        function markMessageAsRead(messageId) {
+            fetch(`/mark_message_read/${messageId}`, {
+                method: 'POST',
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const messageCard = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (messageCard) {
+                        messageCard.classList.remove('border-primary');
+                        const badge = messageCard.querySelector('.badge');
+                        if (badge) {
+                            badge.remove();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mark messages as read when they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const messageId = entry.target.dataset.messageId;
+                    if (messageId) {
+                        markMessageAsRead(messageId);
+                    }
+                }
+            });
+        });
+
+        document.querySelectorAll('.card[data-message-id]').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
 </body>
 </html> 

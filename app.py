@@ -244,6 +244,7 @@ def top_bathrooms():
 def leaderboard():
     # Get users with most ratings
     top_users = db.session.query(
+        User.id,
         User.username,
         func.count(BathroomRating.id).label('rating_count'),
         func.avg(BathroomRating.overall_rating).label('avg_rating')
@@ -261,6 +262,15 @@ def messages():
     if recipient_id:
         recipient = User.query.get(recipient_id)
     
+    # Mark messages as read when viewing them
+    if recipient_id:
+        Message.query.filter_by(
+            recipient_id=session['user_id'],
+            sender_id=recipient_id,
+            read=False
+        ).update({'read': True})
+        db.session.commit()
+    
     received_messages = Message.query.filter_by(recipient_id=session['user_id'])\
         .order_by(Message.timestamp.desc()).all()
     sent_messages = Message.query.filter_by(sender_id=session['user_id'])\
@@ -269,6 +279,17 @@ def messages():
                          received_messages=received_messages,
                          sent_messages=sent_messages,
                          recipient=recipient)
+
+@app.route('/mark_message_read/<int:message_id>', methods=['POST'])
+@login_required
+def mark_message_read(message_id):
+    message = Message.query.get_or_404(message_id)
+    if message.recipient_id != session['user_id']:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 403
+    
+    message.read = True
+    db.session.commit()
+    return jsonify({'success': True})
 
 @app.route('/send_message/<int:recipient_id>', methods=['POST'])
 @login_required
@@ -283,7 +304,7 @@ def send_message(recipient_id):
         db.session.add(message)
         db.session.commit()
         flash('Message sent successfully!', 'success')
-    return redirect(url_for('messages'))
+    return redirect(url_for('messages', user_id=recipient_id))
 
 @app.route('/view_rating/<int:rating_id>')
 def view_rating(rating_id):
