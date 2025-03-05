@@ -73,7 +73,7 @@
                         </td>
                         {% if 'user_id' in session %}
                         <td>
-                            <a href="{{ url_for('messages') }}?user={{ user.username }}" class="btn btn-sm btn-primary">
+                            <a href="{{ url_for('messages') }}?user_id={{ user.id }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-envelope"></i> Message
                             </a>
                         </td>

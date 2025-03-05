@@ -45,11 +45,11 @@
     <div class="container">
         <h1 class="mb-4">Messages</h1>
         
-        {% if request.args.get('user') %}
+        {% if recipient %}
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">Send Message to {{ request.args.get('user') }}</h5>
-                <form action="{{ url_for('send_message', recipient_id=request.args.get('user_id')) }}" method="POST">
+                <h5 class="card-title">Send Message to {{ recipient.username }}</h5>
+                <form action="{{ url_for('send_message', recipient_id=recipient.id) }}" method="POST">
                     <div class="mb-3">
                         <textarea class="form-control" name="content" rows="3" required></textarea>
                     </div>

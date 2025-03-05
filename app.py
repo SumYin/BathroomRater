@@ -256,13 +256,19 @@ def leaderboard():
 @app.route('/messages')
 @login_required
 def messages():
+    recipient_id = request.args.get('user_id')
+    recipient = None
+    if recipient_id:
+        recipient = User.query.get(recipient_id)
+    
     received_messages = Message.query.filter_by(recipient_id=session['user_id'])\
         .order_by(Message.timestamp.desc()).all()
     sent_messages = Message.query.filter_by(sender_id=session['user_id'])\
         .order_by(Message.timestamp.desc()).all()
     return render_template('messages.html', 
                          received_messages=received_messages,
-                         sent_messages=sent_messages)
+                         sent_messages=sent_messages,
+                         recipient=recipient)
 
 @app.route('/send_message/<int:recipient_id>', methods=['POST'])
 @login_required
