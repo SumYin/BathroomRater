@@ -1,15 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import json
+import os
+from sqlalchemy import func
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bathroom_ratings.db'
+
+# Database configuration
+if os.environ.get('DATABASE_URL'):
+    # Production database (PostgreSQL)
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL').replace('postgres://', 'postgresql://')
+else:
+    # Local development database (SQLite)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///bathroom_ratings.db'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'your-secret-key-here'  # Change this to a secure secret key
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')  # Use environment variable in production
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -60,6 +72,17 @@ class Favorite(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     rating_id = db.Column(db.Integer, db.ForeignKey('bathroom_rating.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    read = db.Column(db.Boolean, default=False)
+    
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    recipient = db.relationship('User', foreign_keys=[recipient_id], backref='received_messages')
 
 def login_required(f):
     @wraps(f)
@@ -202,6 +225,64 @@ def toggle_favorite(rating_id):
 def profile():
     user = User.query.get(session['user_id'])
     return render_template('profile.html', user=user)
+
+@app.route('/top-bathrooms')
+def top_bathrooms():
+    # Get bathrooms with highest average ratings and most favorites
+    top_rated = db.session.query(
+        BathroomRating.location,
+        func.avg(BathroomRating.overall_rating).label('avg_rating'),
+        func.count(BathroomRating.id).label('rating_count'),
+        func.count(Favorite.id).label('favorite_count')
+    ).outerjoin(Favorite).group_by(BathroomRating.location)\
+    .order_by(func.avg(BathroomRating.overall_rating).desc())\
+    .limit(10).all()
+    
+    return render_template('top_bathrooms.html', top_rated=top_rated)
+
+@app.route('/leaderboard')
+def leaderboard():
+    # Get users with most ratings
+    top_users = db.session.query(
+        User.username,
+        func.count(BathroomRating.id).label('rating_count'),
+        func.avg(BathroomRating.overall_rating).label('avg_rating')
+    ).outerjoin(BathroomRating).group_by(User.id, User.username)\
+    .order_by(func.count(BathroomRating.id).desc())\
+    .limit(10).all()
+    
+    return render_template('leaderboard.html', top_users=top_users)
+
+@app.route('/messages')
+@login_required
+def messages():
+    received_messages = Message.query.filter_by(recipient_id=session['user_id'])\
+        .order_by(Message.timestamp.desc()).all()
+    sent_messages = Message.query.filter_by(sender_id=session['user_id'])\
+        .order_by(Message.timestamp.desc()).all()
+    return render_template('messages.html', 
+                         received_messages=received_messages,
+                         sent_messages=sent_messages)
+
+@app.route('/send_message/<int:recipient_id>', methods=['POST'])
+@login_required
+def send_message(recipient_id):
+    content = request.form.get('content')
+    if content:
+        message = Message(
+            sender_id=session['user_id'],
+            recipient_id=recipient_id,
+            content=content
+        )
+        db.session.add(message)
+        db.session.commit()
+        flash('Message sent successfully!', 'success')
+    return redirect(url_for('messages'))
+
+@app.route('/view_rating/<int:rating_id>')
+def view_rating(rating_id):
+    rating = BathroomRating.query.get_or_404(rating_id)
+    return render_template('view_rating.html', rating=rating)
 
 if __name__ == '__main__':
     app.run(debug=True) 

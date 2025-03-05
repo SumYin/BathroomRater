@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Rating - Bathroom Rating App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="Bathroom Rating at {{ rating.location }}">
+    <meta property="og:description" content="Check out this bathroom rating! Cleanliness: {{ rating.cleanliness }}/5, Overall: {{ rating.overall_rating }}/5">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="Bathroom Rating at {{ rating.location }}">
+    <meta property="twitter:description" content="Check out this bathroom rating! Cleanliness: {{ rating.cleanliness }}/5, Overall: {{ rating.overall_rating }}/5">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('landing') }}">Bathroom Rating App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if 'user_id' in session %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('messages') }}">
+                                <i class="bi bi-envelope"></i> Messages
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <h2 class="card-title">{{ rating.location }}</h2>
+                            <div>
+                                {% if 'user_id' in session %}
+                                    {% if rating.user_id == session['user_id'] %}
+                                        <button class="btn btn-sm btn-danger delete-rating" data-id="{{ rating.id }}">Delete</button>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-outline-primary favorite-btn {% if rating.id in user_favorites %}active{% endif %}" data-id="{{ rating.id }}">
+                                        <i class="bi bi-heart-fill"></i>
+                                        <span class="favorite-count">{{ rating.favorites|length }}</span>
+                                    </button>
+                                    <a href="{{ url_for('share_rating', rating_id=rating.id) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-share"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <p class="card-text">
+                            <small class="text-muted">{{ rating.timestamp.strftime('%Y-%m-%d %H:%M') }} • {{ rating.gender }}</small>
+                        </p>
+
+                        <div class="rating-details mb-4">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>Cleanliness: {{ rating.cleanliness }}/5</p>
+                                    <p>Privacy: {{ rating.privacy }}/5</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>Accessibility: {{ rating.accessibility }}/5</p>
+                                    <p>Amenities: {{ rating.amenities }}/5</p>
+                                </div>
+                            </div>
+                            <div class="overall-rating mt-3">
+                                <h4>Overall Rating: {{ rating.overall_rating }}/5</h4>
+                            </div>
+                        </div>
+
+                        {% if rating.comments %}
+                        <div class="comments-section">
+                            <h5>Comments</h5>
+                            <p class="card-text">{{ rating.comments }}</p>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <small class="text-muted">Posted by {{ rating.author.username }}</small>
+                            {% if 'user_id' in session and rating.user_id != session['user_id'] %}
+                            <a href="{{ url_for('messages') }}?user={{ rating.author.username }}&user_id={{ rating.user_id }}" class="btn btn-sm btn-primary ms-2">
+                                <i class="bi bi-envelope"></i> Message Author
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Delete functionality
+        document.querySelectorAll('.delete-rating').forEach(button => {
+            button.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete this rating?')) {
+                    const ratingId = this.dataset.id;
+                    fetch(`/delete/${ratingId}`, {
+                        method: 'POST',
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = "{{ url_for('index') }}";
+                        }
+                    });
+                }
+            });
+        });
+
+        // Favorite functionality
+        document.querySelectorAll('.favorite-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const ratingId = this.dataset.id;
+                fetch(`/favorite/${ratingId}`, {
+                    method: 'POST',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.classList.toggle('active');
+                        const countSpan = this.querySelector('.favorite-count');
+                        countSpan.textContent = data.favorite_count;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
